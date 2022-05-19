@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sinby.demo.dao.ProductDao">
+
+    <!-- 获取产品 -->
+    <select id="getProduct" parameterType="long" resultType="product">
+        SELECT
+            ID as "id",
+            PRODUCT_NAME as "productName",
+            STOCK as "stock",
+            PRICE as "price",
+            VERSION as "version",
+            NOTE as "note"
+        FROM T_PRODUCT
+        WHERE ID = #{id}
+    </select>
+
+    <!-- 使用悲观锁解决超卖问题 -->
+    <select id="getProductPessimisticLock" parameterType="long" resultType="product">
+        SELECT
+            ID as "id",
+            PRODUCT_NAME as "productName",
+            STOCK as "stock",
+            PRICE as "price",
+            VERSION as "version",
+            NOTE as "note"
+        FROM T_PRODUCT
+        WHERE ID = #{id} FOR UPDATE
+    </select>
+
+    <!-- 减库存 -->
+    <update id="deacreaseProduct">
+        UPDATE T_PRODUCT
+        SET
+            STOCK = STOCK - #{quantity}
+        WHERE
+            ID = #{id}
+    </update>
+
+    <!-- 使用乐观锁解决超卖问题 -->
+    <update id="deacreaseProductOptimisticLock">
+        UPDATE T_PRODUCT
+        SET
+            STOCK = STOCK - #{quantity},
+            VERSION = VERSION+1
+        WHERE
+            ID = #{id} AND VERSION=#{version}
+    </update>
+
+    <update id="deacreaseProductOfRedis">
+        UPDATE T_PRODUCT
+        SET
+            STOCK = STOCK - #{quantity}
+        WHERE
+            ID = #{id}
+    </update>
+</mapper>
